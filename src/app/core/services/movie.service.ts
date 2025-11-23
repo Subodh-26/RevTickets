@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, delay, map, catchError } from 'rxjs';
-import { Movie, Show, MovieFilters, ShowFilters, PaginatedResponse } from '../../shared/models';
+import { Movie, Show, MovieFilters, ShowFilters, PaginatedResponse, MovieFormat } from '../../shared/models';
 import { environment } from '../../../environments/environment';
 
 @Injectable({
@@ -9,7 +9,8 @@ import { environment } from '../../../environments/environment';
 })
 export class MovieService {
   private readonly API_URL = `${environment.apiUrl}/movies`;
-  private useMockData = true; // Set to false when backend is running
+  private readonly ADMIN_API_URL = `${environment.apiUrl}/admin/movies`;
+  private useMockData = false; // Backend is now running
 
   // Mock data with working poster URLs
   private mockMovies: Movie[] = [
@@ -372,7 +373,8 @@ export class MovieService {
       if (filters?.formats?.length) params = params.set('formats', filters.formats.join(','));
       if (filters?.rating) params = params.set('rating', filters.rating.toString());
 
-      return this.http.get<Movie[]>(this.API_URL, { params }).pipe(
+      return this.http.get<{ data: Movie[] }>(this.API_URL, { params }).pipe(
+        map(response => response.data || response as unknown as Movie[]),
         catchError(() => this.getMockMovies(filters))
       );
     }
@@ -419,6 +421,16 @@ export class MovieService {
   }
 
   getMovieById(id: string): Observable<Movie | undefined> {
+    if (!this.useMockData) {
+      return this.http.get<{ data: Movie }>(`${this.API_URL}/${id}`).pipe(
+        map(response => response.data || response as unknown as Movie),
+        catchError(() => {
+          // Fallback to mock data
+          const movie = this.mockMovies.find(m => m.id === id);
+          return of(movie);
+        })
+      );
+    }
     const movie = this.mockMovies.find(m => m.id === id);
     return of(movie).pipe(delay(300));
   }
@@ -443,16 +455,44 @@ export class MovieService {
 
   // Admin methods
   createMovie(movie: Omit<Movie, 'id' | 'createdAt' | 'updatedAt'>): Observable<Movie> {
-    const newMovie: Movie = {
+    const defaultFormat: MovieFormat[] = ['2D'];
+    const movieData = {
       ...movie,
-      id: Date.now().toString(),
       // Add defaults for required fields
-      format: movie.format && movie.format.length > 0 ? movie.format : ['2D'],
+      format: movie.format && movie.format.length > 0 ? movie.format : defaultFormat,
       language: movie.language || 'English',
       genres: movie.genres && movie.genres.length > 0 ? movie.genres : ['Drama'],
       cast: movie.cast && movie.cast.length > 0 ? movie.cast : [],
       rating: movie.rating || 0,
-      totalRatings: movie.totalRatings || 0,
+      totalRatings: movie.totalRatings || 0
+    };
+
+    if (!this.useMockData) {
+      return this.http.post<{ data: Movie }>(this.ADMIN_API_URL, movieData).pipe(
+        map(response => {
+          const savedMovie = response.data || response as unknown as Movie;
+          // Also add to local mock data for immediate UI update
+          this.mockMovies.push(savedMovie);
+          return savedMovie;
+        }),
+        catchError(error => {
+          console.error('Failed to save movie to backend:', error);
+          // Fallback to mock data
+          const newMovie: Movie = {
+            ...movieData,
+            id: Date.now().toString(),
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          this.mockMovies.push(newMovie);
+          return of(newMovie);
+        })
+      );
+    }
+
+    const newMovie: Movie = {
+      ...movieData,
+      id: Date.now().toString(),
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -461,6 +501,34 @@ export class MovieService {
   }
 
   updateMovie(id: string, updates: Partial<Movie>): Observable<Movie> {
+    if (!this.useMockData) {
+      return this.http.put<{ data: Movie }>(`${this.ADMIN_API_URL}/${id}`, updates).pipe(
+        map(response => {
+          const updatedMovie = response.data || response as unknown as Movie;
+          // Update local mock data
+          const index = this.mockMovies.findIndex(m => m.id === id);
+          if (index !== -1) {
+            this.mockMovies[index] = updatedMovie;
+          }
+          return updatedMovie;
+        }),
+        catchError(error => {
+          console.error('Failed to update movie in backend:', error);
+          // Fallback to mock data update
+          const index = this.mockMovies.findIndex(m => m.id === id);
+          if (index !== -1) {
+            this.mockMovies[index] = {
+              ...this.mockMovies[index],
+              ...updates,
+              updatedAt: new Date()
+            };
+            return of(this.mockMovies[index]);
+          }
+          throw new Error('Movie not found');
+        })
+      );
+    }
+
     const index = this.mockMovies.findIndex(m => m.id === id);
     if (index !== -1) {
       this.mockMovies[index] = {
@@ -474,6 +542,27 @@ export class MovieService {
   }
 
   deleteMovie(id: string): Observable<void> {
+    if (!this.useMockData) {
+      return this.http.delete<void>(`${this.ADMIN_API_URL}/${id}`).pipe(
+        map(() => {
+          // Remove from local mock data
+          const index = this.mockMovies.findIndex(m => m.id === id);
+          if (index !== -1) {
+            this.mockMovies.splice(index, 1);
+          }
+        }),
+        catchError(error => {
+          console.error('Failed to delete movie from backend:', error);
+          // Fallback to mock data deletion
+          const index = this.mockMovies.findIndex(m => m.id === id);
+          if (index !== -1) {
+            this.mockMovies.splice(index, 1);
+          }
+          return of(void 0);
+        })
+      );
+    }
+
     const index = this.mockMovies.findIndex(m => m.id === id);
     if (index !== -1) {
       this.mockMovies.splice(index, 1);

@@ -22,6 +22,21 @@ public class MovieController {
 
     private final MovieService movieService;
 
+    @GetMapping
+    @Operation(summary = "Get all movies")
+    public ResponseEntity<ApiResponse<List<MovieResponse>>> getAllMovies(
+            @RequestParam(required = false) String status) {
+        List<MovieResponse> movies;
+        if ("now_showing".equalsIgnoreCase(status)) {
+            movies = movieService.getNowShowingMovies();
+        } else if ("coming_soon".equalsIgnoreCase(status)) {
+            movies = movieService.getComingSoonMovies();
+        } else {
+            movies = movieService.getAllMovies();
+        }
+        return ResponseEntity.ok(ApiResponse.success(movies));
+    }
+
     @GetMapping("/now-showing")
     @Operation(summary = "Get all now showing movies")
     public ResponseEntity<ApiResponse<List<MovieResponse>>> getNowShowing() {

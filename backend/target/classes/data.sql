@@ -30,76 +30,90 @@ SELECT id, 'ROLE_USER' FROM users WHERE email IN ('john@example.com', 'jane@exam
 ON DUPLICATE KEY UPDATE role = VALUES(role);
 
 -- =============================================
--- MOVIES
+-- MOVIES (matching frontend mock data)
 -- =============================================
-INSERT INTO movies (id, title, description, duration, rating, certificate, release_date, poster_url, banner_url, trailer_url, status, languages, created_at, updated_at) VALUES
-(1, 'Dune: Part Two', 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between the love of his life and the fate of the universe, he must prevent a terrible future.', 166, 8.8, 'PG-13', '2024-03-01', 'https://image.tmdb.org/t/p/w500/8b8R8l88Qje9dn9OE8PY05Nxl1X.jpg', 'https://image.tmdb.org/t/p/original/xOMo8BRK7PfcJv9JCnx7s5hj0PX.jpg', 'https://www.youtube.com/watch?v=Way9Dexny3w', 'now_showing', 'English,Hindi', NOW(), NOW()),
+INSERT INTO movies (id, title, description, duration, rating, certificate, release_date, poster_url, banner_url, trailer_url, status, language, director, total_ratings, created_at, updated_at) VALUES
+(1, 'Inception', 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.', 148, 4.8, 'UA', '2010-07-16', 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BMTQ2NjMwMTE1NF5BMl5BanBnXkFtZTcwMTMxNjEyMw@@._V1_FMjpg_UX1920_.jpg', 'https://www.youtube.com/embed/YoHD9XEInc0', 'NOW_SHOWING', 'English', 'Christopher Nolan', 15420, NOW(), NOW()),
 
-(2, 'Oppenheimer', 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.', 180, 8.9, 'R', '2023-07-21', 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg', 'https://image.tmdb.org/t/p/original/rLb2cwF3Pazuxaj0sRXQ037tGI1.jpg', 'https://www.youtube.com/watch?v=uYPbbksJxIg', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(2, 'The Dark Knight', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 152, 4.9, 'UA', '2008-07-18', 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_FMjpg_UX1920_.jpg', 'https://www.youtube.com/embed/EXeTwQWrcwY', 'NOW_SHOWING', 'English', 'Christopher Nolan', 23890, NOW(), NOW()),
 
-(3, 'Inception', 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.', 148, 8.8, 'PG-13', '2010-07-16', 'https://image.tmdb.org/t/p/w500/edv5CZvWj09upOsy2Y6IwDhK8bt.jpg', 'https://image.tmdb.org/t/p/original/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg', 'https://www.youtube.com/watch?v=YoHD9XEInc0', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(3, 'Interstellar', 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity''s survival.', 169, 4.7, 'UA', '2014-11-07', 'https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BZjdkOTU3MDktN2IxOS00OGEyLWFmMjktY2FiMmZkNWIyODZiXkEyXkFqcGdeQXVyMTMxODk2OTU@._V1_FMjpg_UX1920_.jpg', 'https://www.youtube.com/embed/zSWdZVtXT7E', 'NOW_SHOWING', 'English', 'Christopher Nolan', 18750, NOW(), NOW()),
 
-(4, 'The Dark Knight', 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.', 152, 9.0, 'PG-13', '2008-07-18', 'https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg', 'https://image.tmdb.org/t/p/original/hkBaDkMWbLaf8B1lsWsKX7Ew3Xq.jpg', 'https://www.youtube.com/watch?v=EXeTwQWrcwY', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(4, 'Dune: Part Two', 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', 166, 4.6, 'UA', '2024-03-01', 'https://m.media-amazon.com/images/M/MV5BN2QyZGU4ZDctOWMzMy00NTc5LThlOGQtODhmNDI1NmY5YzAwXkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BN2QyZGU4ZDctOWMzMy00NTc5LThlOGQtODhmNDI1NmY5YzAwXkEyXkFqcGdeQXVyMDM2NDM2MQ@@._V1_FMjpg_UX1920_.jpg', 'https://www.youtube.com/embed/Way9Dexny3w', 'NOW_SHOWING', 'English', 'Denis Villeneuve', 12340, NOW(), NOW()),
 
-(5, 'Interstellar', 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity''s survival.', 169, 8.7, 'PG-13', '2014-11-07', 'https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg', 'https://image.tmdb.org/t/p/original/xJHokMbljvjADYdit5fK5VQsXEG.jpg', 'https://www.youtube.com/watch?v=zSWdZVtXT7E', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(5, 'Oppenheimer', 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', 180, 4.8, 'A', '2023-07-21', 'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BMDBmYTZjNjUtN2M1MS00MTQ2LTk2ODgtNzc2M2QyZGE5NTVjXkEyXkFqcGdeQXVyNzAwMjU2MTY@._V1_.jpg', 'https://www.youtube.com/embed/uYPbbksJxIg', 'NOW_SHOWING', 'English', 'Christopher Nolan', 19200, NOW(), NOW()),
 
-(6, 'Avatar: The Way of Water', 'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na''vi race to protect their home.', 192, 7.6, 'PG-13', '2022-12-16', 'https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', 'https://image.tmdb.org/t/p/original/s16H6tpK2utvwDtzZ8Qy4qm5Emw.jpg', 'https://www.youtube.com/watch?v=d9MyW72ELq0', 'now_showing', 'English,Hindi,Telugu', NOW(), NOW()),
+(6, 'The Matrix', 'A computer hacker learns about the true nature of reality and his role in the war against its controllers.', 136, 4.7, 'A', '1999-03-31', 'https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BNzQzOTk3OTAtNDQ0Zi00ZTVkLWI0MTEtMDllZjNkYzNjNTc4L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 'https://www.youtube.com/embed/vKQi3bBA1y8', 'NOW_SHOWING', 'English', 'The Wachowskis', 21500, NOW(), NOW()),
 
-(7, 'Spider-Man: No Way Home', 'With Spider-Man''s identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear.', 148, 8.2, 'PG-13', '2021-12-17', 'https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg', 'https://image.tmdb.org/t/p/original/14QbnygCuTO0vl7CAFmPf1fgZfV.jpg', 'https://www.youtube.com/watch?v=JfVOs4VSpmA', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(7, 'Gladiator', 'A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.', 155, 4.6, 'A', '2000-05-05', 'https://m.media-amazon.com/images/M/MV5BMDliMmNhNDEtODUyOS00MjNlLTgxODEtN2U3NzIxMGVkZTA1L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BMDliMmNhNDEtODUyOS00MjNlLTgxODEtN2U3NzIxMGVkZTA1L2ltYWdlXkEyXkFqcGdeQXVyNjU0OTQ0OTY@._V1_.jpg', 'https://www.youtube.com/embed/owK1qxDselE', 'NOW_SHOWING', 'English', 'Ridley Scott', 16800, NOW(), NOW()),
 
-(8, 'Top Gun: Maverick', 'After more than thirty years of service as one of the Navy''s top aviators, Pete Mitchell is where he belongs, pushing the envelope as a courageous test pilot and dodging the advancement in rank that would ground him.', 130, 8.3, 'PG-13', '2022-05-27', 'https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg', 'https://image.tmdb.org/t/p/original/AaV1YIdWKThTnDZ4bD6J6hNhNla.jpg', 'https://www.youtube.com/watch?v=qSqVVswa420', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(8, 'Avatar: The Way of Water', 'Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na''vi race to protect their home.', 192, 4.5, 'UA', '2022-12-16', 'https://m.media-amazon.com/images/M/MV5BYjhiNjBlODctY2ZiOC00YjVlLWFlNzAtNTVhNzM1YjI1NzMxXkEyXkFqcGdeQXVyMjQxNTE1MDA@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BYjhiNjBlODctY2ZiOC00YjVlLWFlNzAtNTVhNzM1YjI1NzMxXkEyXkFqcGdeQXVyMjQxNTE1MDA@._V1_.jpg', 'https://www.youtube.com/embed/d9MyW72ELq0', 'NOW_SHOWING', 'English', 'James Cameron', 14200, NOW(), NOW()),
 
-(9, 'The Batman', 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city''s hidden corruption and question his family''s involvement.', 176, 7.8, 'PG-13', '2022-03-04', 'https://image.tmdb.org/t/p/w500/74xTEgt7R36Fvez9xq6cXtXNNuZ.jpg', 'https://image.tmdb.org/t/p/original/b0PlSFdDwbyK0cf5RxwDpaOJQvQ.jpg', 'https://www.youtube.com/watch?v=mqqft2x_Aa4', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(9, 'Spider-Man: No Way Home', 'With Spider-Man''s identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear.', 148, 4.7, 'UA', '2021-12-17', 'https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BZWMyYzFjYTYtNTRjYi00OGExLWE2YzgtOGRmYjAxZTU3NzBiXkEyXkFqcGdeQXVyMzQ0MzA0NTM@._V1_.jpg', 'https://www.youtube.com/embed/JfVOs4VSpmA', 'NOW_SHOWING', 'English', 'Jon Watts', 22100, NOW(), NOW()),
 
-(10, 'John Wick: Chapter 4', 'John Wick uncovers a path to defeating The High Table. But before he can earn his freedom, Wick must face off against a new enemy with powerful alliances across the globe.', 169, 7.7, 'R', '2023-03-24', 'https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg', 'https://image.tmdb.org/t/p/original/7I6VUdPj6tQECNHdviJkUHD2u89.jpg', 'https://www.youtube.com/watch?v=qEVUtrk8_B4', 'now_showing', 'English,Hindi', NOW(), NOW()),
+(10, 'Top Gun: Maverick', 'After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN''s elite graduates on a mission that demands the ultimate sacrifice.', 130, 4.8, 'UA', '2022-05-27', 'https://m.media-amazon.com/images/M/MV5BZWYzOGEwNTgtNWU3NS00ZTQ0LWJkODUtMmVhMjIwMjA1ZmQwXkEyXkFqcGdeQXVyMjkwOTAyMDU@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BZWYzOGEwNTgtNWU3NS00ZTQ0LWJkODUtMmVhMjIwMjA1ZmQwXkEyXkFqcGdeQXVyMjkwOTAyMDU@._V1_.jpg', 'https://www.youtube.com/embed/giXco2jaZ_4', 'NOW_SHOWING', 'English', 'Joseph Kosinski', 18900, NOW(), NOW()),
 
-(11, 'Deadpool & Wolverine', 'Deadpool''s peaceful existence comes crashing down when the Time Variance Authority recruits him to help safeguard the multiverse. He soon unites with his would-be pal, Wolverine, to complete the mission.', 127, 8.0, 'R', '2024-07-26', 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', 'https://image.tmdb.org/t/p/original/yDHYTfA3R0jFYba16jBB1ef8oIt.jpg', 'https://www.youtube.com/watch?v=73_1biulkYk', 'coming_soon', 'English,Hindi', NOW(), NOW()),
+(11, 'Avatar 3', 'The third installment in the Avatar franchise continues the story of Jake Sully and Neytiri.', 180, 0.0, 'UA', '2025-12-19', 'https://m.media-amazon.com/images/M/MV5BZDA0OGQxNTItMDZkMC00N2UyLTg3MzMtYTJmNjg3Nzk5MzRiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BZDA0OGQxNTItMDZkMC00N2UyLTg3MzMtYTJmNjg3Nzk5MzRiXkEyXkFqcGdeQXVyMjUzOTY1NTc@._V1_.jpg', '', 'COMING_SOON', 'English', 'James Cameron', 0, NOW(), NOW()),
 
-(12, 'Joker: Folie a Deux', 'Arthur Fleck is institutionalized at Arkham awaiting trial for his crimes as Joker. While struggling with his dual identity, Arthur not only stumbles upon true love, but also finds the music that has always been inside him.', 138, 5.5, 'R', '2024-10-04', 'https://image.tmdb.org/t/p/w500/if8QiqCI7WAGImKcJCfzp6VTyKA.jpg', 'https://image.tmdb.org/t/p/original/hV5CiTS5YPRGcLRwN0DHZFe5HxN.jpg', 'https://www.youtube.com/watch?v=_OKAwz2MsJs', 'coming_soon', 'English,Hindi', NOW(), NOW()),
+(12, 'Mission: Impossible 8', 'Ethan Hunt and his IMF team embark on their most dangerous mission yet.', 165, 0.0, 'UA', '2025-05-23', 'https://m.media-amazon.com/images/M/MV5BYzFiZjc1YzctMDY3Zi00NGE5LTlmNWEtN2Q3OWFjYjY1NGM2XkEyXkFqcGdeQXVyMTUyMTUzNjQ0._V1_.jpg', 'https://m.media-amazon.com/images/M/MV5BYzFiZjc1YzctMDY3Zi00NGE5LTlmNWEtN2Q3OWFjYjY1NGM2XkEyXkFqcGdeQXVyMTUyMTUzNjQ0._V1_.jpg', '', 'COMING_SOON', 'English', 'Christopher McQuarrie', 0, NOW(), NOW()),
 
-(13, 'Gladiator II', 'Lucius, the son of Lucilla, must enter the Colosseum after his home is conquered by the tyrannical Emperors who now lead Rome.', 148, 0.0, 'R', '2024-11-22', 'https://image.tmdb.org/t/p/w500/2cxhvwyEwRlysAmRH4iodkvo0z5.jpg', 'https://image.tmdb.org/t/p/original/euYIwmwkmz95mnXvufEmbL6ovhZ.jpg', 'https://www.youtube.com/watch?v=4rgYUipGJNo', 'coming_soon', 'English,Hindi', NOW(), NOW()),
+(13, 'Deadpool & Wolverine', 'Deadpool teams up with Wolverine in an adventure across the multiverse.', 150, 0.0, 'A', '2024-07-26', 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', 'https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg', '', 'COMING_SOON', 'English', 'Shawn Levy', 0, NOW(), NOW()),
 
-(14, 'Wicked', 'The story of how a green-skinned woman framed by the Wizard of Oz becomes the Wicked Witch of the West.', 160, 0.0, 'PG', '2024-11-27', 'https://image.tmdb.org/t/p/w500/c5Tqxeo1UpBvnAc3csUm7j3hlQl.jpg', 'https://image.tmdb.org/t/p/original/uKb22E0nlzr914bA9KyA5CVDl5Y.jpg', 'https://www.youtube.com/watch?v=6COmYeLsz4c', 'coming_soon', 'English', NOW(), NOW()),
-
-(15, 'Moana 2', 'Moana journeys to the far seas of Oceania after receiving an unexpected call from her wayfinding ancestors.', 100, 0.0, 'PG', '2024-11-27', 'https://image.tmdb.org/t/p/w500/m0SbwFNCa9epW1X60deLqTHiP7x.jpg', 'https://image.tmdb.org/t/p/original/tElnmtQ6yz1PjN1kePNl8yMrmxQ.jpg', 'https://www.youtube.com/watch?v=hDZ7y8RP5HE', 'coming_soon', 'English,Hindi', NOW(), NOW())
+(14, 'Joker: Folie a Deux', 'Arthur Fleck is institutionalized at Arkham awaiting trial for his crimes as Joker. While struggling with his dual identity, Arthur falls in love with Harley Quinn.', 138, 0.0, 'A', '2024-10-04', 'https://image.tmdb.org/t/p/w500/if8QiqCI7WAGImKcJCfzp6VTyKA.jpg', 'https://image.tmdb.org/t/p/w500/if8QiqCI7WAGImKcJCfzp6VTyKA.jpg', '', 'COMING_SOON', 'English', 'Todd Phillips', 0, NOW(), NOW())
 ON DUPLICATE KEY UPDATE title = VALUES(title);
 
 -- Add genres for movies
 INSERT INTO movie_genres (movie_id, genre) VALUES
-(1, 'Sci-Fi'), (1, 'Adventure'), (1, 'Drama'),
-(2, 'Biography'), (2, 'Drama'), (2, 'History'),
-(3, 'Sci-Fi'), (3, 'Action'), (3, 'Thriller'),
-(4, 'Action'), (4, 'Crime'), (4, 'Drama'),
-(5, 'Sci-Fi'), (5, 'Adventure'), (5, 'Drama'),
-(6, 'Sci-Fi'), (6, 'Adventure'), (6, 'Action'),
-(7, 'Action'), (7, 'Adventure'), (7, 'Sci-Fi'),
-(8, 'Action'), (8, 'Drama'),
-(9, 'Action'), (9, 'Crime'), (9, 'Drama'),
-(10, 'Action'), (10, 'Crime'), (10, 'Thriller'),
-(11, 'Action'), (11, 'Comedy'), (11, 'Sci-Fi'),
-(12, 'Crime'), (12, 'Drama'), (12, 'Musical'),
-(13, 'Action'), (13, 'Adventure'), (13, 'Drama'),
-(14, 'Fantasy'), (14, 'Musical'),
-(15, 'Animation'), (15, 'Adventure'), (15, 'Family')
+(1, 'Action'), (1, 'Sci-Fi'), (1, 'Thriller'),
+(2, 'Action'), (2, 'Crime'), (2, 'Drama'),
+(3, 'Adventure'), (3, 'Drama'), (3, 'Sci-Fi'),
+(4, 'Action'), (4, 'Adventure'), (4, 'Sci-Fi'),
+(5, 'Biography'), (5, 'Drama'), (5, 'History'),
+(6, 'Action'), (6, 'Sci-Fi'),
+(7, 'Action'), (7, 'Adventure'), (7, 'Drama'),
+(8, 'Action'), (8, 'Adventure'), (8, 'Fantasy'),
+(9, 'Action'), (9, 'Adventure'), (9, 'Fantasy'),
+(10, 'Action'), (10, 'Drama'),
+(11, 'Action'), (11, 'Adventure'), (11, 'Fantasy'),
+(12, 'Action'), (12, 'Adventure'), (12, 'Thriller'),
+(13, 'Action'), (13, 'Comedy'), (13, 'Sci-Fi'),
+(14, 'Crime'), (14, 'Drama'), (14, 'Musical')
 ON DUPLICATE KEY UPDATE genre = VALUES(genre);
+
+-- Add formats for movies
+INSERT INTO movie_formats (movie_id, format) VALUES
+(1, '2D'), (1, 'IMAX'),
+(2, '2D'), (2, 'IMAX'), (2, '4DX'),
+(3, '2D'), (3, 'IMAX'), (3, 'DOLBY'),
+(4, '2D'), (4, '3D'), (4, 'IMAX'), (4, '4DX'),
+(5, '2D'), (5, 'IMAX'), (5, 'DOLBY'),
+(6, '2D'), (6, '4DX'),
+(7, '2D'), (7, 'IMAX'),
+(8, '3D'), (8, 'IMAX'), (8, '4DX'), (8, 'DOLBY'),
+(9, '2D'), (9, '3D'), (9, 'IMAX'), (9, '4DX'),
+(10, '2D'), (10, 'IMAX'), (10, '4DX'), (10, 'DOLBY'),
+(11, '3D'), (11, 'IMAX'), (11, '4DX'), (11, 'DOLBY'),
+(12, '2D'), (12, 'IMAX'), (12, '4DX'),
+(13, '2D'), (13, 'IMAX'), (13, '4DX'),
+(14, '2D'), (14, 'IMAX')
+ON DUPLICATE KEY UPDATE format = VALUES(format);
 
 -- Add cast for movies
 INSERT INTO movie_cast (movie_id, cast_member) VALUES
-(1, 'Timothee Chalamet'), (1, 'Zendaya'), (1, 'Rebecca Ferguson'), (1, 'Josh Brolin'),
-(2, 'Cillian Murphy'), (2, 'Emily Blunt'), (2, 'Matt Damon'), (2, 'Robert Downey Jr.'),
-(3, 'Leonardo DiCaprio'), (3, 'Joseph Gordon-Levitt'), (3, 'Ellen Page'), (3, 'Tom Hardy'),
-(4, 'Christian Bale'), (4, 'Heath Ledger'), (4, 'Aaron Eckhart'), (4, 'Michael Caine'),
-(5, 'Matthew McConaughey'), (5, 'Anne Hathaway'), (5, 'Jessica Chastain'), (5, 'Michael Caine'),
-(6, 'Sam Worthington'), (6, 'Zoe Saldana'), (6, 'Sigourney Weaver'), (6, 'Kate Winslet'),
-(7, 'Tom Holland'), (7, 'Zendaya'), (7, 'Benedict Cumberbatch'), (7, 'Tobey Maguire'),
-(8, 'Tom Cruise'), (8, 'Miles Teller'), (8, 'Jennifer Connelly'), (8, 'Jon Hamm'),
-(9, 'Robert Pattinson'), (9, 'Zoe Kravitz'), (9, 'Paul Dano'), (9, 'Colin Farrell'),
-(10, 'Keanu Reeves'), (10, 'Donnie Yen'), (10, 'Bill Skarsgard'), (10, 'Laurence Fishburne'),
-(11, 'Ryan Reynolds'), (11, 'Hugh Jackman'), (11, 'Emma Corrin'), (11, 'Matthew Macfadyen'),
-(12, 'Joaquin Phoenix'), (12, 'Lady Gaga'), (12, 'Brendan Gleeson'), (12, 'Zazie Beetz'),
-(13, 'Paul Mescal'), (13, 'Denzel Washington'), (13, 'Pedro Pascal'), (13, 'Connie Nielsen'),
-(14, 'Cynthia Erivo'), (14, 'Ariana Grande'), (14, 'Michelle Yeoh'), (14, 'Jeff Goldblum'),
-(15, 'Auli''i Cravalho'), (15, 'Dwayne Johnson'), (15, 'Alan Tudyk')
+(1, 'Leonardo DiCaprio'), (1, 'Tom Hardy'), (1, 'Joseph Gordon-Levitt'),
+(2, 'Christian Bale'), (2, 'Heath Ledger'), (2, 'Aaron Eckhart'),
+(3, 'Matthew McConaughey'), (3, 'Anne Hathaway'), (3, 'Jessica Chastain'),
+(4, 'Timothee Chalamet'), (4, 'Zendaya'), (4, 'Rebecca Ferguson'),
+(5, 'Cillian Murphy'), (5, 'Emily Blunt'), (5, 'Robert Downey Jr.'),
+(6, 'Keanu Reeves'), (6, 'Laurence Fishburne'), (6, 'Carrie-Anne Moss'),
+(7, 'Russell Crowe'), (7, 'Joaquin Phoenix'), (7, 'Connie Nielsen'),
+(8, 'Sam Worthington'), (8, 'Zoe Saldana'), (8, 'Sigourney Weaver'),
+(9, 'Tom Holland'), (9, 'Zendaya'), (9, 'Benedict Cumberbatch'),
+(10, 'Tom Cruise'), (10, 'Miles Teller'), (10, 'Jennifer Connelly'),
+(11, 'Sam Worthington'), (11, 'Zoe Saldana'),
+(12, 'Tom Cruise'), (12, 'Hayley Atwell'),
+(13, 'Ryan Reynolds'), (13, 'Hugh Jackman'),
+(14, 'Joaquin Phoenix'), (14, 'Lady Gaga')
 ON DUPLICATE KEY UPDATE cast_member = VALUES(cast_member);
 
 -- =============================================

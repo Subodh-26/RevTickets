@@ -32,6 +32,12 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
+    public List<MovieResponse> getAllMovies() {
+        return movieRepository.findAll().stream()
+                .map(MovieResponse::fromEntity)
+                .collect(Collectors.toList());
+    }
+
     public MovieResponse getMovieById(Long id) {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Movie", "id", id));

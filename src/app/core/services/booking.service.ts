@@ -1,15 +1,17 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay, tap } from 'rxjs';
+import { Observable, of, delay, tap, map, catchError } from 'rxjs';
 import { Booking, BookedSeat, Seat, SeatSelection } from '../../shared/models';
 import { AuthService } from './auth.service';
 import { ShowService } from './show.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BookingService {
-  private readonly API_URL = '/api/bookings';
+  private readonly API_URL = `${environment.apiUrl}/bookings`;
+  private useMockData = false; // Backend is now running
 
   // Current booking state
   private currentSelectionSignal = signal<SeatSelection | null>(null);
@@ -84,9 +86,7 @@ export class BookingService {
     const currentUser = this.authService.currentUser();
     const userId = currentUser ? String(currentUser.id) : '1';
 
-    const newBooking: Booking = {
-      id: 'b' + Date.now(),
-      bookingNumber: 'RTK' + Date.now().toString().slice(-7),
+    const bookingData = {
       userId,
       showId,
       seats: bookedSeats,
@@ -94,7 +94,37 @@ export class BookingService {
       baseAmount,
       convenienceFee,
       taxes,
-      totalAmount: total,
+      totalAmount: total
+    };
+
+    if (!this.useMockData) {
+      return this.http.post<Booking>(this.API_URL, bookingData).pipe(
+        map(savedBooking => {
+          // Also add to local mock data for immediate UI update
+          this.mockBookings.push(savedBooking);
+          return savedBooking;
+        }),
+        catchError(error => {
+          console.error('Failed to save booking to backend:', error);
+          // Fallback to mock data
+          const newBooking: Booking = {
+            id: 'b' + Date.now(),
+            bookingNumber: 'RTK' + Date.now().toString().slice(-7),
+            ...bookingData,
+            status: 'pending',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          };
+          this.mockBookings.push(newBooking);
+          return of(newBooking);
+        })
+      );
+    }
+
+    const newBooking: Booking = {
+      id: 'b' + Date.now(),
+      bookingNumber: 'RTK' + Date.now().toString().slice(-7),
+      ...bookingData,
       status: 'pending',
       createdAt: new Date(),
       updatedAt: new Date()
@@ -106,12 +136,33 @@ export class BookingService {
 
   // Get booking by ID
   getBookingById(id: string): Observable<Booking | undefined> {
+    if (!this.useMockData) {
+      return this.http.get<Booking>(`${this.API_URL}/${id}`).pipe(
+        catchError(() => {
+          const booking = this.mockBookings.find(b => b.id === id);
+          return of(booking);
+        })
+      );
+    }
     const booking = this.mockBookings.find(b => b.id === id);
     return of(booking).pipe(delay(300));
   }
 
   // Get bookings for current user
   getUserBookings(userId: string): Observable<Booking[]> {
+    if (!this.useMockData) {
+      return this.http.get<Booking[]>(`${this.API_URL}/user/${userId}`).pipe(
+        map(bookings => bookings.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )),
+        catchError(() => {
+          const bookings = this.mockBookings.filter(b => b.userId === userId);
+          return of(bookings.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          ));
+        })
+      );
+    }
     const bookings = this.mockBookings.filter(b => b.userId === userId);
     return of(bookings.sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
@@ -120,6 +171,49 @@ export class BookingService {
 
   // Update booking status
   updateBookingStatus(id: string, status: Booking['status'], paymentId?: string): Observable<Booking> {
+    const updateData = { status, paymentId };
+
+    if (!this.useMockData) {
+      return this.http.put<Booking>(`${this.API_URL}/${id}/status`, updateData).pipe(
+        map(updatedBooking => {
+          // Update local mock data
+          const index = this.mockBookings.findIndex(b => b.id === id);
+          if (index !== -1) {
+            this.mockBookings[index] = updatedBooking;
+          }
+          // Mark seats as booked in the show service when booking is confirmed
+          if (status === 'confirmed') {
+            const seatIds = updatedBooking.seats.map(s => s.seatId);
+            this.showService.bookSeats(updatedBooking.showId, seatIds);
+          }
+          return updatedBooking;
+        }),
+        catchError(error => {
+          console.error('Failed to update booking status in backend:', error);
+          // Fallback to mock data update
+          const index = this.mockBookings.findIndex(b => b.id === id);
+          if (index !== -1) {
+            this.mockBookings[index] = {
+              ...this.mockBookings[index],
+              status,
+              paymentId: paymentId || this.mockBookings[index].paymentId,
+              qrCode: status === 'confirmed' ? `QR_${this.mockBookings[index].bookingNumber}` : undefined,
+              updatedAt: new Date()
+            };
+
+            if (status === 'confirmed') {
+              const booking = this.mockBookings[index];
+              const seatIds = booking.seats.map(s => s.seatId);
+              this.showService.bookSeats(booking.showId, seatIds);
+            }
+
+            return of(this.mockBookings[index]);
+          }
+          throw new Error('Booking not found');
+        })
+      );
+    }
+
     const index = this.mockBookings.findIndex(b => b.id === id);
     if (index !== -1) {
       this.mockBookings[index] = {
@@ -149,6 +243,18 @@ export class BookingService {
 
   // Get all bookings (admin)
   getAllBookings(): Observable<Booking[]> {
+    if (!this.useMockData) {
+      return this.http.get<Booking[]>(this.API_URL).pipe(
+        map(bookings => bookings.sort((a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        )),
+        catchError(() => {
+          return of(this.mockBookings.sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          ));
+        })
+      );
+    }
     return of(this.mockBookings.sort((a, b) =>
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     )).pipe(delay(500));

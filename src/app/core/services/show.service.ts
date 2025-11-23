@@ -28,11 +28,11 @@ export class ShowService {
             rows: 10,
             columns: 15,
             categories: [
-              { name: 'Premium', rows: [1, 2], price: 350, color: '#FFD700' },
+              { name: 'Normal', rows: [1, 2], price: 180, color: '#CD7F32' },
               { name: 'Executive', rows: [3, 4, 5, 6], price: 280, color: '#C0C0C0' },
-              { name: 'Normal', rows: [7, 8, 9, 10], price: 180, color: '#CD7F32' }
+              { name: 'Premium', rows: [7, 8, 9, 10], price: 350, color: '#FFD700' }
             ],
-            gaps: [{ afterRow: 6 }]
+            gaps: [{ afterRow: 2 }]
           },
           totalSeats: 150,
           format: ['2D', 'IMAX']
@@ -57,12 +57,12 @@ export class ShowService {
             rows: 12,
             columns: 20,
             categories: [
-              { name: 'Recliner', rows: [1, 2], price: 800, color: '#8B0000' },
-              { name: 'Premium', rows: [3, 4, 5], price: 450, color: '#FFD700' },
-              { name: 'Executive', rows: [6, 7, 8, 9], price: 350, color: '#C0C0C0' },
-              { name: 'Normal', rows: [10, 11, 12], price: 250, color: '#CD7F32' }
+              { name: 'Normal', rows: [1, 2, 3], price: 250, color: '#CD7F32' },
+              { name: 'Executive', rows: [4, 5, 6, 7], price: 350, color: '#C0C0C0' },
+              { name: 'Premium', rows: [8, 9, 10], price: 450, color: '#FFD700' },
+              { name: 'Recliner', rows: [11, 12], price: 800, color: '#8B0000' }
             ],
-            gaps: [{ afterRow: 5 }, { afterRow: 9 }]
+            gaps: [{ afterRow: 3 }, { afterRow: 7 }]
           },
           totalSeats: 240,
           format: ['IMAX', '3D']

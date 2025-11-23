@@ -26,11 +26,11 @@ import { Movie } from '../../../shared/models';
       </div>
       <div class="card-content">
         <h3 class="title">{{ movie.title }}</h3>
-        <p class="genres">{{ movie.genres?.slice(0, 2).join(', ') || 'Drama' }}</p>
+        <p class="genres">{{ (movie.genres || []).slice(0, 2).join(', ') || 'Drama' }}</p>
         <div class="meta">
           <span class="language">{{ movie.language || 'English' }}</span>
           <span class="dot"></span>
-          <span class="format">{{ movie.format?.join('/') || '2D' }}</span>
+          <span class="format">{{ (movie.format || []).join('/') || '2D' }}</span>
         </div>
       </div>
     </a>

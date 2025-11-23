@@ -7,19 +7,6 @@
         <p>Sign in to continue to RevTickets</p>
       </div>
 
-      <!-- Demo Credentials -->
-      <div class="demo-credentials">
-        <p>Demo Credentials:</p>
-        <div class="demo-buttons">
-          <button type="button" (click)="fillDemoCredentials('user')" class="demo-btn">
-            User Login
-          </button>
-          <button type="button" (click)="fillDemoCredentials('admin')" class="demo-btn">
-            Admin Login
-          </button>
-        </div>
-      </div>
-
       <!-- Login Form -->
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form">
         <!-- Email -->
