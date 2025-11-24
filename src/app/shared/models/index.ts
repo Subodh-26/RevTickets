@@ -33,7 +33,7 @@ export interface BackendApiResponse<T> {
 }
 
 export interface LoginRequest {
-  email: string;
+  emailOrPhone: string;
   password: string;
 }
 
@@ -50,22 +50,27 @@ export interface Movie {
   title: string;
   description: string;
   posterUrl: string;
-  bannerUrl: string;
+  bannerUrl?: string;
   trailerUrl?: string;
   duration: number; // in minutes
   releaseDate: Date;
   endDate?: Date;
-  genres: string[];
+  genre: string; // Backend sends comma-separated string
+  genres?: string[]; // Optional parsed array for frontend use
   language: string;
-  format: MovieFormat[];
-  cast: CastMember[];
+  format: string; // Backend sends comma-separated string
+  formats?: MovieFormat[]; // Optional parsed array for frontend use
+  cast: string; // Backend sends comma-separated string
+  castMembers?: CastMember[]; // Optional parsed array for frontend use
   director: string;
   rating: number;
-  totalRatings: number;
-  certificate: string; // U, UA, A, S
-  status: 'now_showing' | 'coming_soon' | 'ended';
-  createdAt: Date;
-  updatedAt: Date;
+  totalReviews?: number; // Backend field name
+  totalRatings?: number; // Legacy field
+  certification?: string; // Backend field name
+  certificate?: string; // Legacy field - U, UA, A, S
+  status: 'now_showing' | 'coming_soon' | 'ended' | 'NOW_SHOWING' | 'COMING_SOON' | 'ENDED';
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export type MovieFormat = '2D' | '3D' | 'IMAX' | '4DX' | 'DOLBY';
@@ -119,34 +124,41 @@ export interface SeatGap {
 
 // Show Models
 export interface Show {
-  id: string;
-  movieId: string;
+  id: string | number;
+  movieId: string | number;
+  movieTitle?: string; // Backend returns this
   movie?: Movie;
-  theaterId: string;
+  theaterId: string | number;
+  theaterName?: string; // Backend returns this
   theater?: Theater;
-  screenId: string;
+  screenId: string | number;
+  screenName?: string; // Backend returns this
   screen?: Screen;
-  showDate: Date;
-  showTime: string;
+  showDate: Date | string;
+  startTime?: string; // Backend field name
+  showTime?: string; // Legacy field
   endTime: string;
-  format: MovieFormat;
+  format: string | MovieFormat; // Backend sends string
   language: string;
   basePrice: number;
   availableSeats: number;
-  totalSeats: number;
-  status: 'scheduled' | 'filling_fast' | 'almost_full' | 'sold_out' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
+  totalSeats?: number;
+  status: 'scheduled' | 'filling_fast' | 'almost_full' | 'sold_out' | 'cancelled' | 'SCHEDULED' | 'FILLING_FAST' | 'ALMOST_FULL' | 'SOLD_OUT' | 'CANCELLED';
+  priceMultipliers?: string; // Backend field
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 // Seat Models
 export interface Seat {
-  id: string;
-  row: string;
-  number: number;
+  id: string | number;
+  seatRow?: string; // Backend field name
+  row?: string; // Legacy field
+  seatNumber?: number; // Backend field name
+  number?: number; // Legacy field
   category: string;
   price: number;
-  status: 'available' | 'selected' | 'booked' | 'blocked';
+  status: 'available' | 'selected' | 'booked' | 'blocked' | 'AVAILABLE' | 'SELECTED' | 'BOOKED' | 'BLOCKED';
 }
 
 export interface SeatSelection {
@@ -157,47 +169,53 @@ export interface SeatSelection {
 
 // Booking Models
 export interface Booking {
-  id: string;
+  id: string | number;
   bookingNumber: string;
-  userId: string;
-  showId: string;
-  show?: Show;
+  userId: string | number;
+  showId?: string | number; // Legacy field
+  showTime?: Show; // Backend field name (returns full ShowTimeResponse)
+  show?: Show; // Legacy field
   seats: BookedSeat[];
   totalSeats: number;
   baseAmount: number;
   convenienceFee: number;
   taxes: number;
   totalAmount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED';
   paymentId?: string;
   payment?: Payment;
   qrCode?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface BookedSeat {
-  seatId: string;
-  row: string;
-  number: number;
+  id?: string | number; // Backend returns this
+  seatId?: string | number; // Legacy field for booking creation
+  seatRow?: string; // Backend field name
+  row?: string; // Legacy field
+  seatNumber?: number; // Backend field name
+  number?: number; // Legacy field
   category: string;
   price: number;
 }
 
 // Payment Models
 export interface Payment {
-  id: string;
-  bookingId: string;
-  userId: string;
+  id: string | number;
+  bookingId: string | number;
+  userId?: string | number; // Not returned by backend
   amount: number;
   currency: string;
-  method: PaymentMethod;
-  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'refund_processing';
+  method: string | PaymentMethod; // Backend returns string (enum name)
+  status: 'pending' | 'completed' | 'failed' | 'refunded' | 'refund_processing' | 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED' | 'REFUND_PROCESSING';
   transactionId?: string;
+  cardLast4?: string; // Backend field
+  cardType?: string; // Backend field
   paymentDetails?: PaymentDetails;
   refundDetails?: RefundDetails;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
 }
 
 export type PaymentMethod = 'card' | 'upi' | 'netbanking' | 'wallet';
@@ -222,16 +240,22 @@ export interface RefundDetails {
 // Review Models
 export interface Review {
   id: string;
-  movieId: string;
-  userId: string;
+  movieId: string | number;
+  userId: string | number;
   userName: string;
+  userAvatar?: string; // Backend field
   rating: number;
   title?: string;
   content: string;
-  likes: number;
-  isLiked?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  likes?: number; // Legacy field
+  likesCount?: number; // Backend field name
+  dislikesCount?: number; // Backend field
+  verified?: boolean; // Backend field
+  isLiked?: boolean; // Legacy field
+  likedByCurrentUser?: boolean; // Backend field name
+  dislikedByCurrentUser?: boolean; // Backend field
+  createdAt: Date | string;
+  updatedAt?: Date | string;
 }
 
 export interface CreateReviewRequest {
@@ -244,13 +268,16 @@ export interface CreateReviewRequest {
 // Notification Models
 export interface Notification {
   id: string;
-  userId: string;
-  type: NotificationType;
+  userId?: string; // Not returned by backend
+  type: string | NotificationType; // Backend returns string (enum name)
   title: string;
   message: string;
-  data?: Record<string, unknown>;
-  isRead: boolean;
-  createdAt: Date;
+  data?: Record<string, unknown>; // Legacy field
+  metadata?: Record<string, any>; // Backend field name
+  actionUrl?: string; // Backend field
+  isRead?: boolean; // Legacy field
+  read?: boolean; // Backend field name
+  createdAt: Date | string;
 }
 
 export type NotificationType =

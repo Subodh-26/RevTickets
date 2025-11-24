@@ -19,7 +19,7 @@
         <div class="meta-info">
           <span>{{ formatDuration(movie()!.duration) }}</span>
           <span class="dot"></span>
-          <span>{{ movie()!.genres.join(', ') }}</span>
+          <span>{{ movie()!.genre }}</span>
           <span class="dot"></span>
           <span>{{ movie()!.certificate }}</span>
           <span class="dot"></span>
@@ -60,13 +60,12 @@
       <section class="content-section">
         <h2>Cast</h2>
         <div class="cast-grid">
-          @for (member of movie()!.cast; track member.name) {
+          @for (member of getCastMembers(); track member) {
             <div class="cast-card">
               <div class="cast-avatar">
                 <span class="material-icons">person</span>
               </div>
-              <span class="cast-name">{{ member.name }}</span>
-              <span class="cast-role">{{ member.role }}</span>
+              <span class="cast-name">{{ member }}</span>
             </div>
           }
         </div>

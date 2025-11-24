@@ -26,11 +26,11 @@ import { Movie } from '../../../shared/models';
       </div>
       <div class="card-content">
         <h3 class="title">{{ movie.title }}</h3>
-        <p class="genres">{{ (movie.genres || []).slice(0, 2).join(', ') || 'Drama' }}</p>
+        <p class="genres">{{ getGenresDisplay() }}</p>
         <div class="meta">
           <span class="language">{{ movie.language || 'English' }}</span>
           <span class="dot"></span>
-          <span class="format">{{ (movie.format || []).join('/') || '2D' }}</span>
+          <span class="format">{{ getFormatDisplay() }}</span>
         </div>
       </div>
     </a>
@@ -166,5 +166,23 @@ export class MovieCardComponent {
   onImageError(event: Event): void {
     const img = event.target as HTMLImageElement;
     img.src = 'https://via.placeholder.com/300x450/1a1a2e/ffffff?text=No+Image';
+  }
+
+  getGenresDisplay(): string {
+    // Backend sends genre as comma-separated string
+    if (this.movie.genre) {
+      const genres = this.movie.genre.split(',').map(g => g.trim());
+      return genres.slice(0, 2).join(', ');
+    }
+    return 'Drama';
+  }
+
+  getFormatDisplay(): string {
+    // Backend sends format as comma-separated string
+    if (this.movie.format) {
+      const formats = this.movie.format.split(',').map(f => f.trim());
+      return formats.join('/');
+    }
+    return '2D';
   }
 }

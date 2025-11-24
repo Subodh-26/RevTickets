@@ -130,7 +130,11 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  formatSeats(seats: { row: string; number: number }[]): string {
-    return seats.map(s => s.row + s.number).join(', ');
+  formatSeats(seats: any[]): string {
+    return seats.map(s => {
+      const row = s.seatRow || s.row || '';
+      const num = s.seatNumber || s.number || '';
+      return `${row}${num}`;
+    }).join(', ');
   }
 }
