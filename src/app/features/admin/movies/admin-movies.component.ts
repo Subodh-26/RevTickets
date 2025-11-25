@@ -64,7 +64,7 @@ import { Movie } from '../../../shared/models';
                       </div>
                     </div>
                   </td>
-                  <td>{{ movie.genres.slice(0, 2).join(', ') }}</td>
+                  <td>{{ getGenresDisplay(movie) }}</td>
                   <td>{{ movie.language }}</td>
                   <td>
                     <span class="status" [class]="movie.status">
@@ -341,7 +341,7 @@ export class AdminMoviesComponent implements OnInit {
       const query = this.searchQuery.toLowerCase();
       filtered = filtered.filter(m =>
         m.title.toLowerCase().includes(query) ||
-        m.genres.some(g => g.toLowerCase().includes(query))
+        (m.genre && m.genre.toLowerCase().includes(query))
       );
     }
 
@@ -350,6 +350,14 @@ export class AdminMoviesComponent implements OnInit {
     }
 
     this.filteredMovies.set(filtered);
+  }
+
+  getGenresDisplay(movie: Movie): string {
+    if (movie.genre) {
+      const genres = movie.genre.split(',').map(g => g.trim());
+      return genres.slice(0, 2).join(', ');
+    }
+    return '';
   }
 
   deleteMovie(movie: Movie): void {

@@ -400,7 +400,11 @@ export class ConfirmationComponent implements OnInit {
     this.bookingService.getBookingById(bookingId).subscribe(booking => {
       if (booking) {
         this.booking.set(booking);
-        this.loadShowData(booking.showId);
+        // Use showTime if available, otherwise showId
+        const showId = booking.showTime?.id || booking.showId;
+        if (showId) {
+          this.loadShowData(String(showId));
+        }
       } else {
         this.router.navigate(['/']);
       }
@@ -412,7 +416,7 @@ export class ConfirmationComponent implements OnInit {
       if (show) {
         this.show.set(show);
         if (show.movieId) {
-          this.movieService.getMovieById(show.movieId).subscribe(movie => {
+          this.movieService.getMovieById(String(show.movieId)).subscribe(movie => {
             this.movie.set(movie || null);
             this.isLoading.set(false);
           });

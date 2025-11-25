@@ -101,14 +101,14 @@ export class PaymentComponent implements OnInit {
 
     // Process payment
     this.paymentService.processPayment(
-      booking.id,
+      String(booking.id),
       booking.totalAmount,
       this.selectedMethod(),
       details
     ).subscribe({
       next: (payment) => {
         // Update booking status
-        this.bookingService.updateBookingStatus(booking.id, 'confirmed', payment.id).subscribe({
+        this.bookingService.updateBookingStatus(String(booking.id), 'confirmed', String(payment.id)).subscribe({
           next: () => {
             // Add notification
             const user = this.authService.currentUser();

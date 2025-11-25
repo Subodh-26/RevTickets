@@ -29,10 +29,11 @@ export class SeatSelectionComponent implements OnInit {
   seatsByRow = computed(() => {
     const grouped = new Map<string, Seat[]>();
     this.seats().forEach(seat => {
-      if (!grouped.has(seat.row)) {
-        grouped.set(seat.row, []);
+      const row = seat.seatRow || seat.row || 'A'; // Use backend field or fallback
+      if (!grouped.has(row)) {
+        grouped.set(row, []);
       }
-      grouped.get(seat.row)!.push(seat);
+      grouped.get(row)!.push(seat);
     });
     return Array.from(grouped.entries());
   });
@@ -142,9 +143,9 @@ export class SeatSelectionComponent implements OnInit {
     this.isProcessing.set(true);
 
     // Create booking
-    this.bookingService.createBooking(this.show()!.id, this.selectedSeats()).subscribe({
+    this.bookingService.createBooking(String(this.show()!.id), this.selectedSeats()).subscribe({
       next: (booking) => {
-        this.bookingService.setSelectedSeats(this.show()!.id, this.selectedSeats());
+        this.bookingService.setSelectedSeats(String(this.show()!.id), this.selectedSeats());
         this.router.navigate(['/booking', booking.id, 'summary']);
       },
       error: () => {

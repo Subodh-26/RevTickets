@@ -318,7 +318,11 @@ export class BookingSummaryComponent implements OnInit {
     this.bookingService.getBookingById(bookingId).subscribe(booking => {
       if (booking) {
         this.booking.set(booking);
-        this.loadShowData(booking.showId);
+        // Use showTime if available, otherwise showId
+        const showId = booking.showTime?.id || booking.showId;
+        if (showId) {
+          this.loadShowData(String(showId));
+        }
       } else {
         this.router.navigate(['/']);
       }
@@ -330,7 +334,7 @@ export class BookingSummaryComponent implements OnInit {
       if (show) {
         this.show.set(show);
         if (show.movieId) {
-          this.movieService.getMovieById(show.movieId).subscribe(movie => {
+          this.movieService.getMovieById(String(show.movieId)).subscribe(movie => {
             this.movie.set(movie || null);
             this.isLoading.set(false);
           });
@@ -340,6 +344,10 @@ export class BookingSummaryComponent implements OnInit {
   }
 
   getSeatsList(): string {
-    return this.booking()?.seats.map(s => `${s.row}${s.number}`).join(', ') || '';
+    return this.booking()?.seats.map(s => {
+      const row = s.seatRow || s.row || '';
+      const num = s.seatNumber || s.number || '';
+      return `${row}${num}`;
+    }).join(', ') || '';
   }
 }

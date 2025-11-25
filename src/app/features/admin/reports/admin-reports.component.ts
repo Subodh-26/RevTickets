@@ -347,26 +347,58 @@ export class AdminReportsComponent implements OnInit {
       this.totalRevenue.set(revenue);
       this.avgTicketPrice.set(confirmed.length ? revenue / confirmed.length : 0);
 
-      // Generate table data (mock)
-      this.tableData.set([
-        { date: 'Nov 22, 2024', bookings: 45, revenue: 32000, avgPrice: 711.11 },
-        { date: 'Nov 21, 2024', bookings: 38, revenue: 27500, avgPrice: 723.68 },
-        { date: 'Nov 20, 2024', bookings: 52, revenue: 38000, avgPrice: 730.77 },
-        { date: 'Nov 19, 2024', bookings: 41, revenue: 29800, avgPrice: 726.83 },
-        { date: 'Nov 18, 2024', bookings: 35, revenue: 25200, avgPrice: 720.00 }
-      ]);
+      // Calculate real table data from bookings grouped by date
+      const bookingsByDate = new Map<string, { count: number; revenue: number }>();
+      confirmed.forEach(booking => {
+        const dateKey = new Date(booking.createdAt).toLocaleDateString('en-US', {
+          month: 'short', day: 'numeric', year: 'numeric'
+        });
+        const existing = bookingsByDate.get(dateKey) || { count: 0, revenue: 0 };
+        bookingsByDate.set(dateKey, {
+          count: existing.count + 1,
+          revenue: existing.revenue + booking.totalAmount
+        });
+      });
+
+      const tableData = Array.from(bookingsByDate.entries())
+        .map(([date, data]) => ({
+          date,
+          bookings: data.count,
+          revenue: data.revenue,
+          avgPrice: data.count ? data.revenue / data.count : 0
+        }))
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 10); // Top 10 days
+
+      this.tableData.set(tableData);
+
+      // Calculate real top movies from bookings
+      const movieStats = new Map<string, { bookings: number; revenue: number }>();
+      confirmed.forEach(booking => {
+        if (booking.showId) {
+          const movieKey = String(booking.showId); // Convert to string for Map key
+          const existing = movieStats.get(movieKey) || { bookings: 0, revenue: 0 };
+          movieStats.set(movieKey, {
+            bookings: existing.bookings + 1,
+            revenue: existing.revenue + booking.totalAmount
+          });
+        }
+      });
+
+      const topMoviesData = Array.from(movieStats.entries())
+        .map(([showId, data]) => ({
+          title: `Show ${showId}`, // Replace with actual movie title from show/movie data
+          bookings: data.bookings,
+          revenue: data.revenue
+        }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5); // Top 5 movies
+
+      this.topMovies.set(topMoviesData);
     });
 
     this.movieService.getMovies({ status: 'now_showing' }).subscribe(movies => {
       this.activeMovies.set(movies.length);
-
-      // Generate top movies (mock)
-      this.topMovies.set([
-        { title: 'Inception', bookings: 156, revenue: 112500 },
-        { title: 'The Dark Knight', bookings: 142, revenue: 98000 },
-        { title: 'Interstellar', bookings: 128, revenue: 89500 },
-        { title: 'Dune: Part Two', bookings: 95, revenue: 75000 }
-      ]);
     });
   }
 

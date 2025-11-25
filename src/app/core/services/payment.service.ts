@@ -1,33 +1,15 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, delay } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { Payment, PaymentMethod, PaymentDetails } from '../../shared/models';
+import { environment } from '../../../environments/environment';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PaymentService {
-  private readonly API_URL = '/api/payments';
-
-  // Mock payments storage
-  private mockPayments: Payment[] = [
-    {
-      id: 'p1',
-      bookingId: 'b1',
-      userId: '1',
-      amount: 710.36,
-      currency: 'INR',
-      method: 'card',
-      status: 'completed',
-      transactionId: 'TXN20240115001',
-      paymentDetails: {
-        cardLast4: '4242',
-        cardType: 'Visa'
-      },
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    }
-  ];
+  private readonly API_URL = `${environment.apiUrl}/payments`;
 
   constructor(private http: HttpClient) {}
 
@@ -38,91 +20,86 @@ export class PaymentService {
     method: PaymentMethod,
     details: PaymentDetails
   ): Observable<Payment> {
-    // Simulate payment processing
-    const newPayment: Payment = {
-      id: 'p' + Date.now(),
+    const paymentData = {
       bookingId,
-      userId: '1', // Would come from auth service
       amount,
-      currency: 'INR',
       method,
-      status: 'completed', // Simulating success
-      transactionId: 'TXN' + Date.now(),
-      paymentDetails: details,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      paymentDetails: details
     };
 
-    this.mockPayments.push(newPayment);
-
-    // Simulate processing delay (1-2 seconds)
-    return of(newPayment).pipe(delay(1500));
+    return this.http.post<Payment>(this.API_URL, paymentData).pipe(
+      catchError(error => {
+        console.error('Failed to process payment:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
   // Get payment by ID
-  getPaymentById(id: string): Observable<Payment | undefined> {
-    const payment = this.mockPayments.find(p => p.id === id);
-    return of(payment).pipe(delay(300));
+  getPaymentById(id: string): Observable<Payment> {
+    return this.http.get<Payment>(`${this.API_URL}/${id}`).pipe(
+      catchError(error => {
+        console.error('Failed to fetch payment:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
   // Get payment by booking ID
-  getPaymentByBooking(bookingId: string): Observable<Payment | undefined> {
-    const payment = this.mockPayments.find(p => p.bookingId === bookingId);
-    return of(payment).pipe(delay(300));
+  getPaymentByBooking(bookingId: string): Observable<Payment> {
+    return this.http.get<Payment>(`${this.API_URL}/booking/${bookingId}`).pipe(
+      catchError(error => {
+        console.error('Failed to fetch payment by booking:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
   // Get user payment history
   getUserPayments(userId: string): Observable<Payment[]> {
-    const payments = this.mockPayments.filter(p => p.userId === userId);
-    return of(payments.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )).pipe(delay(500));
+    return this.http.get<Payment[]>(`${this.API_URL}/user/${userId}`).pipe(
+      map(payments => payments.sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )),
+      catchError(error => {
+        console.error('Failed to fetch user payments:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
   // Initiate refund
   initiateRefund(paymentId: string, reason: string): Observable<Payment> {
-    const index = this.mockPayments.findIndex(p => p.id === paymentId);
-    if (index !== -1) {
-      this.mockPayments[index] = {
-        ...this.mockPayments[index],
-        status: 'refund_processing',
-        refundDetails: {
-          refundId: 'REF' + Date.now(),
-          amount: this.mockPayments[index].amount,
-          reason,
-          status: 'processing',
-          initiatedAt: new Date()
-        },
-        updatedAt: new Date()
-      };
-      return of(this.mockPayments[index]).pipe(delay(1000));
-    }
-    throw new Error('Payment not found');
+    const refundData = { reason };
+
+    return this.http.post<Payment>(`${this.API_URL}/${paymentId}/refund`, refundData).pipe(
+      catchError(error => {
+        console.error('Failed to initiate refund:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
-  // Complete refund (simulate async completion)
+  // Complete refund
   completeRefund(paymentId: string): Observable<Payment> {
-    const index = this.mockPayments.findIndex(p => p.id === paymentId);
-    if (index !== -1 && this.mockPayments[index].refundDetails) {
-      this.mockPayments[index] = {
-        ...this.mockPayments[index],
-        status: 'refunded',
-        refundDetails: {
-          ...this.mockPayments[index].refundDetails!,
-          status: 'completed',
-          completedAt: new Date()
-        },
-        updatedAt: new Date()
-      };
-      return of(this.mockPayments[index]).pipe(delay(500));
-    }
-    throw new Error('Payment or refund not found');
+    return this.http.put<Payment>(`${this.API_URL}/${paymentId}/refund/complete`, {}).pipe(
+      catchError(error => {
+        console.error('Failed to complete refund:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 
   // Get all payments (admin)
   getAllPayments(): Observable<Payment[]> {
-    return of(this.mockPayments.sort((a, b) =>
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    )).pipe(delay(500));
+    return this.http.get<Payment[]>(this.API_URL).pipe(
+      map(payments => payments.sort((a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      )),
+      catchError(error => {
+        console.error('Failed to fetch all payments:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
+      })
+    );
   }
 }

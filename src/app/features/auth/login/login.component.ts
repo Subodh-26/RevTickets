@@ -43,7 +43,7 @@ export class LoginComponent {
     this.isLoading.set(true);
     const { email, password } = this.loginForm.value;
 
-    this.authService.login({ email, password }).subscribe({
+    this.authService.login({ emailOrPhone: email, password }).subscribe({
       next: () => {
         this.toastService.success('Login successful! Welcome back.');
         this.router.navigateByUrl(this.returnUrl);

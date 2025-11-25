@@ -110,13 +110,14 @@ export class MovieDetailsComponent implements OnInit {
     const showsByTheater = new Map<string, { theater: any; shows: Show[] }>();
 
     this.shows().forEach(show => {
-      if (!showsByTheater.has(show.theaterId)) {
-        showsByTheater.set(show.theaterId, {
+      const theaterId = String(show.theaterId);
+      if (!showsByTheater.has(theaterId)) {
+        showsByTheater.set(theaterId, {
           theater: show.theater,
           shows: []
         });
       }
-      showsByTheater.get(show.theaterId)!.shows.push(show);
+      showsByTheater.get(theaterId)!.shows.push(show);
     });
 
     return Array.from(showsByTheater.values());
@@ -158,16 +159,12 @@ export class MovieDetailsComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user || !this.movie()) return;
 
-    this.reviewService.createReview(
-      {
-        movieId: this.movie()!.id,
-        rating: this.newReviewRating,
-        title: this.newReviewTitle,
-        content: this.newReviewContent
-      },
-      String(user.id),
-      user.fullName
-    ).subscribe(review => {
+    this.reviewService.createReview({
+      movieId: this.movie()!.id,
+      rating: this.newReviewRating,
+      title: this.newReviewTitle,
+      content: this.newReviewContent
+    }).subscribe(review => {
       this.reviews.update(reviews => [review, ...reviews]);
       this.newReviewRating = 0;
       this.newReviewTitle = '';
@@ -194,6 +191,13 @@ export class MovieDetailsComponent implements OnInit {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     return `${hours}h ${mins}m`;
+  }
+
+  getCastMembers(): string[] {
+    const movie = this.movie();
+    if (!movie || !movie.cast) return [];
+    // Backend sends cast as comma-separated string
+    return movie.cast.split(',').map(c => c.trim()).filter(c => c.length > 0);
   }
 
   scrollToShowtimes(): void {

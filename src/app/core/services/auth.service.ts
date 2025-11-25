@@ -58,28 +58,9 @@ export class AuthService {
         this.isLoadingSignal.set(false);
       }),
       catchError(error => {
-        // Fallback to mock auth if backend is unavailable
-        console.warn('Backend unavailable, using mock authentication');
-
-        // Check if admin login
-        const isAdmin = credentials.email === 'admin@revtickets.com';
-
-        const mockUser: User = {
-          id: Date.now(),
-          email: credentials.email,
-          fullName: isAdmin ? 'Admin User' : credentials.email.split('@')[0],
-          roles: isAdmin ? ['ROLE_ADMIN', 'ROLE_USER'] : ['ROLE_USER'],
-          createdAt: new Date()
-        };
-        const mockResponse: AuthResponse = {
-          token: 'mock-jwt-token-' + Date.now(),
-          user: mockUser
-        };
-        localStorage.setItem(this.TOKEN_KEY, mockResponse.token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(mockResponse.user));
-        this.currentUserSignal.set(mockResponse.user);
         this.isLoadingSignal.set(false);
-        return of(mockResponse).pipe(delay(500));
+        console.error('Backend connection failed:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
       })
     );
   }
@@ -96,25 +77,9 @@ export class AuthService {
         this.isLoadingSignal.set(false);
       }),
       catchError(error => {
-        // Fallback to mock auth if backend is unavailable
-        console.warn('Backend unavailable, using mock registration');
-        const mockUser: User = {
-          id: Date.now(),
-          email: data.email,
-          fullName: data.fullName,
-          phone: data.phone,
-          roles: ['ROLE_USER'],
-          createdAt: new Date()
-        };
-        const mockResponse: AuthResponse = {
-          token: 'mock-jwt-token-' + Date.now(),
-          user: mockUser
-        };
-        localStorage.setItem(this.TOKEN_KEY, mockResponse.token);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(mockResponse.user));
-        this.currentUserSignal.set(mockResponse.user);
         this.isLoadingSignal.set(false);
-        return of(mockResponse).pipe(delay(500));
+        console.error('Backend connection failed:', error);
+        return throwError(() => new Error('Unable to connect to backend server. Please ensure the server is running.'));
       })
     );
   }

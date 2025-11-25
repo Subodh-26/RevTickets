@@ -328,9 +328,9 @@ export class MovieFormComponent implements OnInit {
           posterUrl: movie.posterUrl,
           bannerUrl: movie.bannerUrl,
           trailerUrl: movie.trailerUrl || '',
-          genres: movie.genres.join(', '),
+          genres: movie.genre || '', // Backend sends string, not array
           language: movie.language,
-          format: movie.format.join(', '),
+          format: movie.format || '', // Backend sends string, not array
           director: movie.director
         });
       }
